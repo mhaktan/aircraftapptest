@@ -1,0 +1,193 @@
+[
+  {
+    "id": "flow-SnagReport-approval",
+    "name": "SnagReport Approval Flow",
+    "edges": [
+      {
+        "id": "gen_1783333112039_3",
+        "sourceNodeId": "gen_1783333112039_1",
+        "targetNodeId": "gen_1783333112039_2"
+      },
+      {
+        "id": "gen_1783333112039_5",
+        "branch": "true",
+        "sourceNodeId": "gen_1783333112039_2",
+        "targetNodeId": "gen_1783333112039_4"
+      },
+      {
+        "id": "gen_1783333112039_7",
+        "sourceNodeId": "gen_1783333112039_4",
+        "targetNodeId": "gen_1783333112039_6"
+      },
+      {
+        "id": "gen_1783333112039_10",
+        "sourceNodeId": "gen_1783333112039_8",
+        "targetNodeId": "gen_1783333112039_9"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "gen_1783333112039_1",
+        "type": "trigger",
+        "label": "On SnagReport Submit",
+        "trigger": {
+          "type": "on-field-change",
+          "fieldName": "status",
+          "resourceName": "SnagReport"
+        },
+        "position": {
+          "x": 300,
+          "y": 50
+        }
+      },
+      {
+        "id": "gen_1783333112039_2",
+        "type": "condition",
+        "label": "Status = InProgress?",
+        "position": {
+          "x": 300,
+          "y": 160
+        },
+        "condition": {
+          "logic": "and",
+          "rules": [
+            {
+              "field": "triggerData.status",
+              "value": "1",
+              "operator": "equals"
+            }
+          ]
+        }
+      },
+      {
+        "id": "gen_1783333112039_4",
+        "type": "approval",
+        "label": "SnagReport Approval",
+        "approval": {
+          "steps": [
+            {
+              "name": "Line Mechanic Review",
+              "actions": [
+                {
+                  "type": "approve",
+                  "label": "Submit for CRS"
+                },
+                {
+                  "type": "revise",
+                  "label": "Revise",
+                  "requiredFields": [
+                    "revisionNote"
+                  ]
+                }
+              ],
+              "assigneeType": "role",
+              "assigneeValue": "LineMechanic"
+            },
+            {
+              "name": "Certifying Staff Approval",
+              "actions": [
+                {
+                  "type": "approve",
+                  "label": "Sign & Close"
+                },
+                {
+                  "type": "revise",
+                  "label": "Send Back",
+                  "requiredFields": [
+                    "revisionNote"
+                  ]
+                }
+              ],
+              "assigneeType": "role",
+              "assigneeValue": "CertifyingStaff"
+            }
+          ],
+          "onCompleteEvent": "SnagReport-approval-completed",
+          "revisionAssignee": "previous-step",
+          "trackRevisionHistory": true
+        },
+        "position": {
+          "x": 300,
+          "y": 280
+        }
+      },
+      {
+        "id": "gen_1783333112039_6",
+        "type": "action",
+        "label": "Send Approval Email",
+        "action": {
+          "type": "send-email",
+          "config": {
+            "to": "{{assigneeEmail}}",
+            "body": "<p>Sayin onaycı,</p><p><strong>{{triggerData.title}}</strong> snag raporu onayinizi beklemektedir.</p><p>ATA Chapter: {{triggerData.ataChapter}} | Kritiklik: {{triggerData.severity}}</p>",
+            "subject": "Snag Raporu #{{triggerData.title}} — Onayinizi bekliyor",
+            "contentType": "html"
+          }
+        },
+        "position": {
+          "x": 300,
+          "y": 400
+        }
+      },
+      {
+        "id": "gen_1783333112039_8",
+        "type": "trigger",
+        "label": "On SnagReport Approved",
+        "trigger": {
+          "type": "manual",
+          "resourceName": "SnagReport"
+        },
+        "position": {
+          "x": 700,
+          "y": 50
+        }
+      },
+      {
+        "id": "gen_1783333112039_9",
+        "type": "action",
+        "label": "Send Completion Email",
+        "action": {
+          "type": "send-email",
+          "config": {
+            "cc": "{{departmentEmails}}",
+            "to": "{{creatorEmail}}",
+            "body": "<p>{{triggerData.formNo}} numarali formun onay sureci tamamlanmistir.</p>",
+            "subject": "{{triggerData.formNo}} — Tum onaylar tamamlandi",
+            "contentType": "html"
+          }
+        },
+        "position": {
+          "x": 700,
+          "y": 160
+        }
+      }
+    ],
+    "enabled": true,
+    "createdAt": "2026-07-06T10:18:32.039Z",
+    "updatedAt": "2026-07-06T10:18:32.039Z",
+    "variables": [
+      {
+        "name": "assigneeEmail",
+        "type": "string",
+        "defaultValue": ""
+      },
+      {
+        "name": "creatorEmail",
+        "type": "string",
+        "defaultValue": ""
+      },
+      {
+        "name": "departmentEmails",
+        "type": "string",
+        "defaultValue": ""
+      },
+      {
+        "name": "formLink",
+        "type": "string",
+        "defaultValue": ""
+      }
+    ],
+    "description": "Auto-generated approval flow for SnagReport. Customize email templates and add conditions as needed.",
+    "resourceName": "SnagReport"
+  }
+]
